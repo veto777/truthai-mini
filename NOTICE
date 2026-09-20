@@ -1,0 +1,18 @@
+truthai-mini builds against, and self-hosters serve alongside it, the following third-party work (the fonts under www/app/fonts/ are the only third-party files contained here; all code is built against, not bundled):
+
+- WebLLM and MLC-LLM (Apache License 2.0) — https://github.com/mlc-ai/web-llm — the in-browser
+  inference runtime (`www/vendor/web-llm.js`) and the compiled per-model WebGPU wasm libraries.
+- Apache TVM (Apache License 2.0) — the compiler stack behind the wasm libraries.
+- Qwen3 model weights (Apache License 2.0) — https://huggingface.co/Qwen — served as separate
+  signed releases, not contained in this repository.
+- Abliterated Qwen3 variants by mlabonne (Apache License 2.0) — https://huggingface.co/mlabonne.
+
+tools/q4f16_1_convert.py is an independent GroupQuantize implementation written for this project (it targets
+the MLC model layout but copies no MLC source). The code in this repository is MIT-licensed (see LICENSE). The Apache-2.0 artefacts above keep
+their own licence and notices.
+
+
+Bundled fonts (www/app/fonts/), redistributed under the SIL Open Font License 1.1
+(full text in www/app/fonts/*-OFL.txt):
+- Chakra Petch — Copyright (c) Cadson Demak. Reserved Font Name "Chakra Petch".
+- JetBrains Mono — Copyright (c) JetBrains. Reserved Font Name "JetBrains Mono".

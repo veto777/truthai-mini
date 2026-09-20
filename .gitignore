@@ -1,0 +1,12 @@
+node_modules/
+*.bak*
+.env*
+logs/
+*.secret
+www/models/
+www/release/
+*.pem
+*_ed25519
+!*.pub.hex
+__pycache__/
+*.pyc

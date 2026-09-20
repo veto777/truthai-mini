@@ -1,0 +1,185 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover"><title>TruthAi Mini</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#08090b"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="fonts.css">
+<style>
+:root{--f-body:"JetBrains Mono",ui-monospace,Menlo,monospace;--f-head:"Chakra Petch","JetBrains Mono",monospace}
+/* design tokens shared with the TruthCoder product theme */
+:root{--bg:#f6f5f2;--panel:#ffffff;--side:#f1efeb;--line:#e7e3dc;--fg:#191a1d;--mut:#7c8189;--acc:#E4452B;--ok:#2e9e5b;--warn:#b8860b;--bub:#ffffff}
+/* dark applies when the system says dark AND the user hasn't forced light, or when the user forces dark (same override pattern as the main TruthCoder theme) */
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#08090b;--panel:#0f1114;--side:#0b0c0f;--line:#1d2126;--fg:#e6e9ec;--mut:#6b7178;--acc:#E4452B;--ok:#3ddc84;--warn:#f5b342;--bub:#0f1114}}
+:root[data-theme="dark"]{--bg:#08090b;--panel:#0f1114;--side:#0b0c0f;--line:#1d2126;--fg:#e6e9ec;--mut:#6b7178;--acc:#E4452B;--ok:#3ddc84;--warn:#f5b342;--bub:#0f1114}
+*{box-sizing:border-box}html,body{height:100%;height:100dvh;overscroll-behavior:none}
+html{-webkit-text-size-adjust:100%}   /* 2026-09-18: the composer must always be on screen — 100dvh follows iOS's
+   shrinking toolbar (100vh does not, which is what pushed the prompt box below the fold), and a fixed body stops
+   the whole shell from rubber-banding out of view. */
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 var(--f-body);display:grid;grid-template-columns:244px 1fr;overflow:hidden;position:fixed;inset:0;height:100dvh}
+
+/* ---------- sidebar ---------- */
+aside{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+aside .brand{display:flex;align-items:center;gap:8px;padding:12px 14px;font:700 14px/1 var(--f-head);letter-spacing:.06em}
+aside .brand b{color:var(--acc)}
+aside .pad{padding:0 10px}
+aside .lbl{padding:14px 14px 6px;font:700 10.5px/1 var(--f-head);letter-spacing:.14em;color:var(--mut)}
+aside .brand span{flex:1}
+.navx{display:none;background:transparent;border:0;color:var(--mut);font-size:17px;padding:2px 6px;cursor:pointer;line-height:1}
+details.sec{border-top:1px solid var(--line)}
+details.sec>summary{list-style:none;cursor:pointer;padding:10px 14px;font:700 10.5px/1 var(--f-head);letter-spacing:.14em;color:var(--mut);display:flex;align-items:center;gap:6px;user-select:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:'▾';margin-left:auto;font-size:11px;transition:transform .15s}
+details.sec[open]>summary::after{transform:rotate(180deg)}
+details.sec>summary:hover{color:var(--fg)}
+#scrim{display:none}
+aside .list{flex:1;overflow:auto;padding:0 6px 8px;min-height:60px}
+.i{display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;border-radius:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--fg)}
+.i:hover{background:color-mix(in srgb,var(--line) 55%,transparent)}
+.i.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--fg)}
+.i small{color:var(--mut);margin-left:auto;font-size:10.5px}
+aside .dx{padding:0 6px 8px}
+aside .dx .i{text-decoration:none;padding:5px 9px;font-size:12px}
+aside .dx .i small{margin-left:auto;font-size:10px;opacity:.7}
+aside .dx .i.warn small{color:var(--acc);opacity:1}
+aside .lbl.sep{border-top:1px solid var(--line);margin-top:6px;padding-top:12px}
+aside .dx .note{padding:4px 9px 6px;font-size:10px;line-height:1.45;color:var(--mut)}
+aside .dx .note b{color:var(--acc)}
+aside .dx .i.pick{background:color-mix(in srgb,var(--acc) 16%,transparent)}
+aside .dx .i.pick::after{content:'chosen';margin-left:6px;font-size:9.5px;color:var(--acc)}
+aside .foot{border-top:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:7px;flex:none}
+aside .foot .pill{font-size:10px;padding:2px 7px;white-space:normal;line-height:1.4}
+aside .foot #setupbtn{padding:6px 10px;font-size:12px;justify-content:center}
+aside .foot .small{font-size:11px;color:var(--mut);line-height:1.45}
+.newbtn{width:100%;justify-content:center;background:transparent;color:var(--fg);border:1px solid var(--line)}
+.newbtn:hover{border-color:var(--acc)}
+
+/* ---------- main ---------- */
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+main>header{display:flex;gap:10px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+header .menu{display:none;background:transparent;border:1px solid var(--line);color:var(--fg);padding:5px 9px;border-radius:8px}
+header .ttl{font:700 13px/1 var(--f-head);letter-spacing:.04em}
+header .st{color:var(--mut);font-size:11.5px;text-align:right;min-width:0}
+header #theme{padding:5px 9px;font-size:14px;line-height:1}
+#scroll{flex:1;overflow:auto;min-height:0}
+#wrap{max-width:860px;width:100%;margin:0 auto;padding:18px 16px 8px;display:flex;flex-direction:column;gap:14px}
+#chat{display:flex;flex-direction:column;gap:14px}   /* messages live here, not in #wrap; without this the bubbles' align-self:flex-end did nothing and user text stayed left */
+
+/* ---------- messages: mine right, model left ---------- */
+.m{padding:10px 13px;border-radius:14px;white-space:pre-wrap;word-break:break-word;max-width:78%;border:1px solid var(--line)}
+/* the two sides must read as different at a glance: mine = a clear red-accent fill, TruthCoder = a distinct panel with a red left edge */
+.m.u{align-self:flex-end;background:color-mix(in srgb,var(--acc) 9%,var(--panel));border-color:color-mix(in srgb,var(--acc) 22%,var(--line));border-bottom-right-radius:5px}
+.m.a{align-self:flex-start;background:var(--side);border-bottom-left-radius:5px;border-left:2px solid color-mix(in srgb,var(--acc) 45%,transparent);padding-left:13px}
+.m.sk{color:var(--mut)}   /* the bubble stacks: preamble, then the working line, then the bar — it was flex-row, which put the spinner beside the text and flattened the bar */
+.spin{width:13px;height:13px;border-radius:50%;border:2px solid color-mix(in srgb,var(--acc) 35%,transparent);border-top-color:var(--acc);animation:sp .7s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.acts{display:flex;gap:2px;margin-top:7px;flex-wrap:wrap}
+.m.u .acts{justify-content:flex-end}
+.acts button{background:transparent;border:0;color:var(--mut);padding:4px 6px;border-radius:7px;cursor:pointer;font:inherit;font-size:12px;line-height:1;display:inline-flex;align-items:center;gap:4px}
+.acts button:hover{background:color-mix(in srgb,var(--line) 60%,transparent);color:var(--fg)}
+.acts button.on{color:var(--acc)}
+.acts .ico{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.search{margin:2px 10px 4px;position:relative}
+.search input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:7px 10px 7px 30px;color:inherit;font:inherit;font-size:12.5px}
+.search input:focus{outline:none;border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
+.search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--mut);fill:none;stroke-width:2}
+.grp{padding:12px 14px 4px;font:700 10px/1 var(--f-head);letter-spacing:.12em;color:var(--mut)}
+.m .cur{display:inline-block;width:.55ch;height:1.05em;vertical-align:-.15em;margin-left:1px;background:var(--acc);animation:cur .85s steps(1) infinite}
+@keyframes cur{50%{opacity:0}}
+.m .pre{margin:0 0 9px;padding:0 0 9px;border-bottom:1px dashed var(--line);color:var(--fg);font-family:var(--f-head);font-weight:500}
+.m .work{display:flex;align-items:center;gap:9px;color:var(--mut);font-size:12.5px}
+.wbar{height:5px;border-radius:3px;margin-top:9px;background:var(--line);overflow:hidden;position:relative}
+.wbar i{position:absolute;inset:0;width:38%;border-radius:3px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:sl 1.25s ease-in-out infinite}
+@keyframes sl{0%{left:-38%}100%{left:100%}}
+
+/* ---------- setup card ---------- */
+.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:15px}
+.card h3{margin:0 0 9px;font:700 11px/1 var(--f-head);letter-spacing:.12em;color:var(--mut)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:7px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+button[disabled]{opacity:.45;cursor:default}
+[hidden]{display:none!important}   /* button{display:inline-flex} beat the browser's [hidden] rule, so the Install button showed on every device */
+button.g{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button.g:hover:not([disabled]){border-color:var(--acc)}
+.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .25s}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;margin:2px 3px 0 0;color:var(--mut)}
+.pill.ok{border-color:var(--ok);color:var(--ok)}.pill.bad{border-color:var(--acc);color:var(--acc)}.pill.warn{border-color:var(--warn);color:var(--warn)}
+.small{font-size:11.5px;color:var(--mut)}
+
+/* ---------- composer ---------- */
+form{border-top:1px solid var(--line);background:var(--panel)}
+.cin{position:relative;display:flex;gap:9px;max-width:860px;width:100%;margin:0 auto;padding:11px 16px}
+#send{position:absolute;right:24px;bottom:19px;width:38px;height:38px;min-width:38px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+#send svg{width:18px;height:18px;display:block}
+#send[disabled]{opacity:.45}
+textarea{flex:1;min-height:48px;max-height:190px;resize:none;background:var(--bg);color:inherit;border:1px solid var(--line);border-radius:11px;padding:10px 56px 10px 12px;font:inherit;font-size:16px}   /* 16px: anything smaller makes iOS Safari zoom the page on focus */
+textarea:focus{outline:none;border-color:color-mix(in srgb,var(--acc) 55%,var(--line))}
+.cfoot{max-width:860px;margin:0 auto;padding:0 16px 10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--mut)}
+label.t{display:inline-flex;gap:6px;align-items:center}
+
+/* ---------- phones: sidebar slides over ---------- */
+@media(max-width:760px){
+  body{grid-template-columns:1fr}
+  aside{position:fixed;inset:0 auto 0 0;width:84vw;max-width:310px;z-index:30;transform:translateX(-100%);transition:transform .18s;overflow-y:auto;overscroll-behavior:contain}
+  body.nav aside{transform:none}
+  #scrim{display:block;position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .18s}
+  body.nav #scrim{opacity:1;pointer-events:auto}   /* a real element, not a box-shadow: the old scrim was decorative and could not be tapped to close */
+  body.nav{overflow:hidden}
+  .navx{display:inline-block}
+  aside .list{flex:none;max-height:34vh}
+  header .menu{display:inline-flex}
+  .m{max-width:92%}
+  .cfoot{font-size:10.5px;gap:8px;padding:0 12px 10px}
+  .cin{padding:9px 12px;gap:7px}
+  #send{right:20px;bottom:17px}
+  textarea{min-height:42px}
+}
+</style></head><body>
+<aside id="side">
+  <div class="brand"><b>◎</b> <span>TruthAi&nbsp;Mini</span><button class="navx" id="navx" aria-label="close menu">✕</button></div>
+  <div class="pad"><button class="g newbtn" id="new">+ New chat</button></div>
+  <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="csearch" placeholder="Search chats" autocomplete="off"></div>
+  <div class="list" id="chats"></div>
+  <details class="sec" id="sec-build" open>
+    <summary>Builds</summary>
+    <div class="dx">
+      <a class="i" id="dl-desktop" href="?size=4b" title="Full 4-billion-parameter build. 2.3 GB, needs about 4 GB of graphics memory. Desktops with a dedicated card.">Desktop · 4B <small>2.3 GB</small></a>
+      <a class="i" id="dl-mid" href="?size=1.7B" title="Middle build, 1.7 billion parameters. 939 MB. The phone default — the best fit for mobile devices, and noticeably faster than the 4B on modest hardware.">Balanced · 1.7B <small>939 MB</small></a>
+      <a class="i" id="dl-mobile" href="?size=0.6B" title="Smallest build, 0.6 billion parameters. 336 MB. Last-resort fallback for devices the 1.7B cannot hold; the least capable.">Mobile · 0.6B <small>336 MB</small></a>
+      <div class="note">The 4B is for <b>desktops and laptops only</b> — phones cap memory far below it; phones get the 1.7B. <span id="autopick"></span></div>
+    </div>
+  </details>
+  <div class="foot">
+    <div class="small" id="sub">runs on this device · your chats never leave it</div>
+    <div id="gate"></div>
+    <button class="g" id="setupbtn">Model &amp; storage</button>
+  </div>
+</aside>
+<div id="scrim"></div>
+<main>
+  <header>
+    <button class="menu" id="menu" aria-label="menu">☰</button>
+    <span class="ttl" id="title">New chat</span>
+    <button class="menu" id="info" aria-label="about this device" title="about this device" hidden style="margin-left:auto;display:none">i</button>
+    <button class="menu" id="theme" aria-label="theme" style="display:inline-flex">◐</button>
+    <span class="st" id="st">starting</span>
+  </header>
+  <div id="scroll"><div id="wrap">
+    <section class="card" id="setup"><h3>SETUP</h3>
+      <div id="setupmsg" class="small">checking this device…</div>
+      <div class="bar" style="margin-top:9px"><i id="bar"></i></div>
+      <div class="row"><span class="small" id="prog"></span></div>
+      <div class="row">
+        <button id="get" disabled>Launch model</button>
+        <button class="g" id="verify" disabled>Re-verify</button>
+        <button class="g" id="del">Delete model</button>
+        <button class="g" id="install" hidden>Install app</button>
+      </div>
+    </section>
+    <div id="riskbox" class="small" hidden style="margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;color:var(--mut)"></div>
+    <div id="chat"></div>
+  </div></div>
+  <form id="f">
+    <div class="cin"><textarea id="q" placeholder="ask anything — it stays here" disabled></textarea><button id="send" disabled aria-label="Send" title="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></button><button id="stop" class="g" hidden title="Stop generating">Stop</button></div>
+    <div class="cfoot">
+      <button class="g" id="export" style="padding:4px 10px;font-size:11.5px;margin-left:auto">Export</button>
+    </div>
+  </form>
+</main>
+<script src="./boot.js"></script><script type="module" src="./client.js"></script></body></html>

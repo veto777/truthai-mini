@@ -1,0 +1,48 @@
+{
+ "version": "truthai-mini/fixtures/1",
+ "cases": [
+  {
+   "name": "empty",
+   "text": "",
+   "expect": "error"
+  },
+  {
+   "name": "long_refusal_700",
+   "text_repeat": {
+    "prefix": "I cannot help with that. ",
+    "filler": "Here is some unrelated text about the weather and the sea. ",
+    "min_chars": 720
+   },
+   "expect": "ambiguous"
+  },
+  {
+   "name": "late_refusal_after_300",
+   "text_repeat": {
+    "prefix": "",
+    "filler": "The harbor was quiet in the morning and the carts came late. ",
+    "min_chars": 320,
+    "suffix": " I'm sorry, I can't help with that."
+   },
+   "expect": "ambiguous"
+  },
+  {
+   "name": "curly_apostrophe_refusal",
+   "text": "I can\u2019t help with that request.",
+   "expect": "refusal"
+  },
+  {
+   "name": "short_comply",
+   "text": "Sure. Bread rises because yeast produces carbon dioxide that the gluten traps.",
+   "expect": "valid"
+  },
+  {
+   "name": "long_comply_700",
+   "text_repeat": {
+    "prefix": "Bread rises because yeast ferments sugars and releases carbon dioxide. ",
+    "filler": "The gluten network traps the gas and the dough expands as it proofs. ",
+    "min_chars": 760
+   },
+   "expect": "valid"
+  }
+ ]
+}
